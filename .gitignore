@@ -98,6 +98,20 @@ dist
 # Sveltekit cache directory
 .svelte-kit/
 
+# Temporary files
+temp_message.json
+*.tmp
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
 # vitepress build output
 **/.vitepress/dist
 

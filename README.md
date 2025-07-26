@@ -209,9 +209,11 @@ A action detecta automaticamente o tipo de evento e ajusta a aparência:
 A action segue este processo:
 
 1. **Setup Node.js 18**: Configura o ambiente Node.js
-2. **Instala dependências**: Executa `npm ci` para instalar pacotes
+2. **Instala dependências**: Executa `npm install` para instalar pacotes
 3. **Compila TypeScript**: Executa `npm run build` para gerar JavaScript
 4. **Executa script**: Roda `node dist/test-local-fixed.js` com variáveis de ambiente
+
+> **Nota**: A action usa `npm install` em vez de `npm ci` para maior compatibilidade com diferentes ambientes.
 
 ### Variáveis de Ambiente Configuradas:
 - `SLACK_WEBHOOK_URL`: URL do webhook (do input)

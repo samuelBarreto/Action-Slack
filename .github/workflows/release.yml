@@ -19,7 +19,7 @@ jobs:
           cache: 'npm'
       
       - name: 'Install dependencies'
-        run: npm ci
+        run: npm install
       
       - name: 'Build TypeScript project'
         run: npm run build
@@ -49,11 +49,11 @@ jobs:
                 webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
             ```
             
-            ### 🔧 Processo da Action:
-            1. **Setup Node.js 18**
-            2. **Instala dependências** (`npm ci`)
-            3. **Compila TypeScript** (`npm run build`)
-            4. **Executa script compilado** (`node dist/test-local-fixed.js`)
+                         ### 🔧 Processo da Action:
+             1. **Setup Node.js 18**
+             2. **Instala dependências** (`npm install`)
+             3. **Compila TypeScript** (`npm run build`)
+             4. **Executa script compilado** (`node dist/test-local-fixed.js`)
           
           draft: false
           prerelease: false
