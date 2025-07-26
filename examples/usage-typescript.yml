@@ -1,0 +1,53 @@
+name: 'Slack Notification (TypeScript Build)'
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Send Slack Notification'
+        uses: samuelBarreto/Action-Slack@main
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🚀 Deploy realizado com sucesso! (TypeScript Build)'
+          channel: '#deployments'
+          username: 'TypeScript Bot'
+          icon-emoji: ':typescript:'
+          include-event-details: 'true'
+
+  # Exemplo com diferentes eventos
+  notify-events:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch'
+    steps:
+      - name: 'Notify Push'
+        if: github.event_name == 'push'
+        uses: samuelBarreto/Action-Slack@main
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '📤 Push realizado na branch ${{ github.ref_name }}'
+          channel: '#code'
+      
+      - name: 'Notify Pull Request'
+        if: github.event_name == 'pull_request'
+        uses: samuelBarreto/Action-Slack@main
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🔀 Pull Request ${{ github.event.action }}: ${{ github.event.pull_request.title }}'
+          channel: '#code-review'
+      
+      - name: 'Notify Release'
+        if: github.event_name == 'release'
+        uses: samuelBarreto/Action-Slack@main
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🎉 Release ${{ github.event.action }}: ${{ github.event.release.name }}'
+          channel: '#releases' 

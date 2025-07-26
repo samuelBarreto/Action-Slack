@@ -1,0 +1,78 @@
+name: 'Slack Notification with Environment Variables'
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  # Variáveis de ambiente globais
+  SLACK_CHANNEL: '#deployments'
+  SLACK_USERNAME: 'Deploy Bot'
+  SLACK_ICON: ':rocket:'
+  CUSTOM_MESSAGE: '🚀 Deploy realizado com sucesso!'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    env:
+      # Variáveis de ambiente específicas do job
+      JOB_SPECIFIC_CHANNEL: '#team-notifications'
+      JOB_SPECIFIC_USERNAME: 'Team Bot'
+    
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Send Notification with Env Vars'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: ${{ env.CUSTOM_MESSAGE }}
+          channel: ${{ env.JOB_SPECIFIC_CHANNEL }}
+          username: ${{ env.JOB_SPECIFIC_USERNAME }}
+          icon-emoji: ${{ env.SLACK_ICON }}
+
+  # Exemplo com variáveis condicionais baseadas em ambiente
+  notify-environment:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [staging, production]
+    
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Send Environment Notification'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: |
+            🚀 Deploy para ${{ matrix.environment }}
+            Repositório: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+          channel: ${{ matrix.environment == 'production' && '#prod-alerts' || '#staging-alerts' }}
+          username: '${{ matrix.environment }} Deploy Bot'
+          icon-emoji: ${{ matrix.environment == 'production' && ':warning:' || ':rocket:' }}
+
+  # Exemplo com variáveis de secrets
+  notify-with-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Send Secret Notification'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: |
+            🔐 Deploy com variáveis seguras
+            Ambiente: ${{ secrets.ENVIRONMENT }}
+            Versão: ${{ secrets.APP_VERSION }}
+          channel: ${{ secrets.SLACK_CHANNEL }}
+          username: 'Secret Bot'
+          icon-emoji: ':lock:' 

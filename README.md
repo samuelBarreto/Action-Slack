@@ -10,6 +10,8 @@ Uma GitHub Action reutilizável para enviar notificações para o Slack sobre ev
 - 🎨 **Customizável**: Cores e emojis diferentes por tipo de evento
 - 🔒 **Seguro**: Usa secrets para URLs do webhook
 - 🐌 **Compatível**: Usa curl com arquivo temporário (mesmo método do test-local-fixed.js)
+- ⚡ **TypeScript**: Build otimizado com Node.js 18+
+- 🔄 **Automático**: Compila e executa o script da pasta `dist`
 
 ## 📋 Pré-requisitos
 
@@ -82,6 +84,40 @@ jobs:
     webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
     message: '🚀 Deploy realizado com sucesso! A aplicação está no ar.'
     channel: '#team-notifications'
+```
+
+### Uso com Variáveis
+
+```yaml
+env:
+  SLACK_CHANNEL: '#deployments'
+  SLACK_USERNAME: 'Deploy Bot'
+  SLACK_ICON: ':rocket:'
+
+- name: 'Send Notification with Variables'
+  uses: samuelBarreto/Action-Slack@main
+  with:
+    webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+    message: ${{ github.event.inputs.custom_message || '🚀 Deploy realizado!' }}
+    channel: ${{ env.SLACK_CHANNEL }}
+    username: ${{ env.SLACK_USERNAME }}
+    icon-emoji: ${{ env.SLACK_ICON }}
+```
+
+### Variáveis de Contexto do GitHub
+
+```yaml
+- name: 'Send Context Notification'
+  uses: samuelBarreto/Action-Slack@main
+  with:
+    webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+    message: |
+      🚀 Deploy do repositório: ${{ github.repository }}
+      Branch: ${{ github.ref_name }}
+      Commit: ${{ github.sha }}
+      Autor: ${{ github.actor }}
+      Evento: ${{ github.event_name }}
+    channel: '#deployments'
 ```
 
 ## 📥 Inputs
@@ -168,6 +204,29 @@ A action detecta automaticamente o tipo de evento e ajusta a aparência:
    # Valor: https://hooks.slack.com/services/...
    ```
 
+## 🔧 Como a Action Funciona
+
+A action segue este processo:
+
+1. **Setup Node.js 18**: Configura o ambiente Node.js
+2. **Instala dependências**: Executa `npm ci` para instalar pacotes
+3. **Compila TypeScript**: Executa `npm run build` para gerar JavaScript
+4. **Executa script**: Roda `node dist/test-local-fixed.js` com variáveis de ambiente
+
+### Variáveis de Ambiente Configuradas:
+- `SLACK_WEBHOOK_URL`: URL do webhook (do input)
+- `GITHUB_REPOSITORY`: Repositório atual
+- `GITHUB_REF_NAME`: Nome da branch/tag
+- `GITHUB_SHA`: Hash do commit
+- `GITHUB_ACTOR`: Usuário que executou a action
+- `GITHUB_EVENT_NAME`: Tipo do evento (push, pull_request, etc.)
+- `GITHUB_JOB_STATUS`: Status do job (success/failure)
+- `CUSTOM_MESSAGE`: Mensagem personalizada (do input)
+- `SLACK_CHANNEL`: Canal do Slack (do input)
+- `SLACK_USERNAME`: Nome do bot (do input)
+- `SLACK_ICON_EMOJI`: Emoji do bot (do input)
+- `INCLUDE_EVENT_DETAILS`: Incluir detalhes do evento (do input)
+
 ## 🧪 Teste Local
 
 Para testar localmente, use o script incluído:
@@ -186,6 +245,15 @@ GITHUB_EVENT_NAME=release npm run test:action
 ```
 
 O script `test-action.js` simula exatamente o comportamento da action usando curl com arquivo temporário.
+
+### Teste da Versão TypeScript:
+```bash
+# Desenvolvimento
+npm run dev
+
+# Produção (compilado)
+npm start
+```
 
 ## 📝 Licença
 

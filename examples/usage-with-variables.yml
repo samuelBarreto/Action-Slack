@@ -1,0 +1,97 @@
+name: 'Slack Notification with Variables'
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+  workflow_dispatch:
+    inputs:
+      custom_message:
+        description: 'Mensagem personalizada'
+        required: false
+        default: '🚀 Deploy manual realizado!'
+
+env:
+  # Variáveis globais do workflow
+  SLACK_CHANNEL: '#deployments'
+  SLACK_USERNAME: 'Deploy Bot'
+  SLACK_ICON: ':rocket:'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Send Notification with Variables'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: ${{ github.event.inputs.custom_message || '🚀 Deploy realizado com sucesso!' }}
+          channel: ${{ env.SLACK_CHANNEL }}
+          username: ${{ env.SLACK_USERNAME }}
+          icon-emoji: ${{ env.SLACK_ICON }}
+          include-event-details: 'true'
+
+  # Exemplo com variáveis condicionais
+  notify-conditional:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch'
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Notify Push'
+        if: github.event_name == 'push'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '📤 Push realizado na branch ${{ github.ref_name }}'
+          channel: '#code'
+          username: 'Push Bot'
+          icon-emoji: ':git:'
+      
+      - name: 'Notify Pull Request'
+        if: github.event_name == 'pull_request'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🔀 Pull Request ${{ github.event.action }}: ${{ github.event.pull_request.title }}'
+          channel: '#code-review'
+          username: 'PR Bot'
+          icon-emoji: ':git:'
+      
+      - name: 'Notify Release'
+        if: github.event_name == 'release'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🎉 Release ${{ github.event.action }}: ${{ github.event.release.name }}'
+          channel: '#releases'
+          username: 'Release Bot'
+          icon-emoji: ':package:'
+
+  # Exemplo com variáveis de contexto
+  notify-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Send Context Notification'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: |
+            🚀 Deploy do repositório: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Autor: ${{ github.actor }}
+            Evento: ${{ github.event_name }}
+          channel: '#deployments'
+          username: 'Context Bot'
+          icon-emoji: ':information_source:' 

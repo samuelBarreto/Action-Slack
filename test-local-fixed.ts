@@ -35,16 +35,21 @@ interface SlackAttachment {
 
 interface SlackMessage {
   text: string;
-  attachments: SlackAttachment[];
+  attachments?: SlackAttachment[];
   username?: string;
   icon_emoji?: string;
   channel?: string;
 }
 
-// Configuração do webhook (do seu test.yaml)
+// Configuração do webhook e variáveis
 const SLACK_WEBHOOK_URL: string = process.env['SLACK_WEBHOOK_URL'] || '';
+const CUSTOM_MESSAGE: string = process.env['CUSTOM_MESSAGE'] || '';
+const SLACK_CHANNEL: string = process.env['SLACK_CHANNEL'] || '';
+const SLACK_USERNAME: string = process.env['SLACK_USERNAME'] || 'GitHub Action Bot';
+const SLACK_ICON_EMOJI: string = process.env['SLACK_ICON_EMOJI'] || ':rocket:';
+const INCLUDE_EVENT_DETAILS: string = process.env['INCLUDE_EVENT_DETAILS'] || 'true';
 
-// Dados simulados do GitHub
+// Dados do GitHub (com variáveis de ambiente)
 const githubData: GitHubData = {
   repository: process.env['GITHUB_REPOSITORY'] || 'seu-usuario/seu-repositorio',
   ref_name: process.env['GITHUB_REF_NAME'] || 'main',
@@ -54,10 +59,21 @@ const githubData: GitHubData = {
   job_status: process.env['GITHUB_JOB_STATUS'] || 'success'
 };
 
-// Cria a mensagem (mesmo formato do GitHub Action)
+// Cria a mensagem usando variáveis
 const message: SlackMessage = {
-  text: "🧪 Teste Local - GitHub Action do Slack",
-  attachments: [
+  text: CUSTOM_MESSAGE || "🧪 GitHub Action - Slack Notification",
+  username: SLACK_USERNAME,
+  icon_emoji: SLACK_ICON_EMOJI
+};
+
+// Adiciona canal se especificado
+if (SLACK_CHANNEL) {
+  message.channel = SLACK_CHANNEL;
+}
+
+// Adiciona attachments se incluir detalhes do evento
+if (INCLUDE_EVENT_DETAILS === 'true') {
+  message.attachments = [
     {
       color: githubData.job_status === 'success' ? "#36a64f" : "#ff0000",
       title: `GitHub Action - ${githubData.event_name}`,
@@ -93,11 +109,11 @@ const message: SlackMessage = {
           short: true
         }
       ],
-      footer: "GitHub Action do Slack - Teste Local",
+      footer: "GitHub Action do Slack",
       ts: Math.floor(Date.now() / 1000)
     }
-  ]
-};
+  ];
+}
 
 // Função para enviar mensagem via curl usando arquivo temporário
 function sendSlackMessage(): void {

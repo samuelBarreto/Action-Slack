@@ -53,5 +53,10 @@ runs:
         GITHUB_SHA: ${{ github.sha }}
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_EVENT_NAME: ${{ github.event_name }}
-        GITHUB_JOB_STATUS: 'success'
+        GITHUB_JOB_STATUS: ${{ job.status }}
+        CUSTOM_MESSAGE: ${{ inputs.message }}
+        SLACK_CHANNEL: ${{ inputs.channel }}
+        SLACK_USERNAME: ${{ inputs.username }}
+        SLACK_ICON_EMOJI: ${{ inputs.icon-emoji }}
+        INCLUDE_EVENT_DETAILS: ${{ inputs.include-event-details }}
       run: node dist/test-local-fixed.js 
