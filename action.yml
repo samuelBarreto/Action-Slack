@@ -41,7 +41,7 @@ runs:
           const webhookUrl = core.getInput('webhook-url');
           const customMessage = core.getInput('message');
           const channel = core.getInput('channel');
-          const username = core.getInput('github-actor');
+          const username = core.getInput('username');
           const iconEmoji = core.getInput('icon-emoji');
           const includeEventDetails = core.getInput('include-event-details') === 'true';
           
