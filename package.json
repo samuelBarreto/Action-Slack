@@ -1,0 +1,31 @@
+{
+  "name": "github-slack-Action-Slack",
+  "version": "1.0.0",
+  "description": "GitHub Actions para enviar notificações para o Slack via curl",
+  "main": "test-local.js",
+  "scripts": {
+    "test:fixed": "node test-local-fixed.js",
+    "test:simple": "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"Hello, World!\"}' https://hooks.slack.com/services/",
+    "test:action": "node test-action.js"
+  },
+  "keywords": [
+    "github",
+    "actions",
+    "slack",
+    "notifications",
+    "curl",
+    "automation"
+  ],
+  "author": "Samuel Campos",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samuelBarreto/Action-Slack"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1"
+  }
+}

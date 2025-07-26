@@ -1,0 +1,141 @@
+name: 'Slack Notification Action'
+description: 'Envia notificações para o Slack sobre eventos do GitHub'
+author: 'Samuel Campos'
+
+inputs:
+  webhook-url:
+    description: 'URL do webhook do Slack'
+    required: true
+  message:
+    description: 'Mensagem personalizada (opcional)'
+    required: false
+    default: ''
+  channel:
+    description: 'Canal do Slack (opcional)'
+    required: false
+    default: ''
+  username:
+    description: 'Nome do bot (opcional)'
+    required: false
+    default: 'GitHub Action Bot'
+  icon-emoji:
+    description: 'Emoji do bot (opcional)'
+    required: false
+    default: ':rocket:'
+  include-event-details:
+    description: 'Incluir detalhes do evento (true/false)'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Send Slack Notification'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const core = require('@actions/core');
+          const github = require('@actions/github');
+          
+          // Obter inputs
+          const webhookUrl = core.getInput('webhook-url');
+          const customMessage = core.getInput('message');
+          const channel = core.getInput('channel');
+          const username = core.getInput('username');
+          const iconEmoji = core.getInput('icon-emoji');
+          const includeEventDetails = core.getInput('include-event-details') === 'true';
+          
+          // Obter contexto do GitHub
+          const context = github.context;
+          const eventName = context.eventName;
+          const repository = context.repo;
+          const actor = context.actor;
+          const sha = context.sha;
+          const ref = context.ref;
+          
+          // Determinar status baseado no evento
+          let status = 'success';
+          let statusColor = '#36a64f';
+          let statusEmoji = '✅';
+          
+          if (eventName === 'pull_request') {
+            status = 'pull_request';
+            statusColor = '#0066cc';
+            statusEmoji = '🔀';
+          } else if (eventName === 'issues') {
+            status = 'issue';
+            statusColor = '#ff9500';
+            statusEmoji = '📝';
+          } else if (eventName === 'release') {
+            status = 'release';
+            statusColor = '#6f42c1';
+            statusEmoji = '🚀';
+          }
+          
+          // Criar mensagem
+          let message = {
+            username: username,
+            icon_emoji: iconEmoji
+          };
+          
+          if (channel) {
+            message.channel = channel;
+          }
+          
+          if (customMessage) {
+            // Usar mensagem personalizada
+            message.text = customMessage;
+          } else {
+            // Mensagem padrão com detalhes do evento
+            message.text = `${statusEmoji} GitHub Action - ${eventName}`;
+            
+            if (includeEventDetails) {
+              message.attachments = [{
+                color: statusColor,
+                title: `Evento: ${eventName}`,
+                fields: [
+                  {
+                    title: 'Repositório',
+                    value: `${repository.owner}/${repository.repo}`,
+                    short: true
+                  },
+                  {
+                    title: 'Branch/Ref',
+                    value: ref.replace('refs/heads/', '').replace('refs/tags/', ''),
+                    short: true
+                  },
+                  {
+                    title: 'Autor',
+                    value: actor,
+                    short: true
+                  },
+                  {
+                    title: 'Commit',
+                    value: sha.substring(0, 8),
+                    short: true
+                  }
+                ],
+                footer: 'GitHub Action do Slack',
+                ts: Math.floor(Date.now() / 1000)
+              }];
+            }
+          }
+          
+          // Enviar para o Slack
+          try {
+            const response = await fetch(webhookUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(message)
+            });
+            
+            if (response.ok) {
+              core.info('✅ Notificação enviada para o Slack com sucesso!');
+            } else {
+              core.setFailed(`❌ Erro ao enviar notificação: ${response.status} ${response.statusText}`);
+            }
+          } catch (error) {
+            core.setFailed(`❌ Erro ao enviar notificação: ${error.message}`);
+          } 

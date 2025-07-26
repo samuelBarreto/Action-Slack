@@ -1,0 +1,24 @@
+name: 'Slack Notification - Advanced'
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+  issues:
+    types: [ opened, closed ]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Send Slack Notification'
+        uses: samuelBarreto/Action-Slack@main
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel: '#deployments'
+          username: 'Deploy Bot'
+          icon-emoji: ':rocket:'
+          include-event-details: 'true' 

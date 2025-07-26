@@ -1,0 +1,35 @@
+name: 'Slack Notification - Custom Message'
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Build project'
+        run: echo "Building project..."
+      
+      - name: 'Notify Success'
+        if: success()
+        uses: samuelBarreto/Action-Slack@main
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🎉 Build realizado com sucesso! A aplicação está pronta para deploy.'
+          channel: '#team-notifications'
+          username: 'Build Bot'
+          icon-emoji: ':white_check_mark:'
+      
+      - name: 'Notify Failure'
+        if: failure()
+        uses: samuelBarreto/Action-Slack@main
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '❌ Falha no build! Verifique os logs e corrija os problemas.'
+          channel: '#alerts'
+          username: 'Alert Bot'
+          icon-emoji: ':warning:' 

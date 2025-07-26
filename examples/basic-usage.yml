@@ -1,0 +1,16 @@
+name: 'Slack Notification - Basic'
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Send Slack Notification'
+        uses: samuelBarreto/Action-Slack@main
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }} 
