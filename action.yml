@@ -38,10 +38,10 @@ runs:
           const github = require('@actions/github');
           
           // Obter inputs
-          const webhookUrl = core.getInput('webhook-url');
-          const customMessage = core.getInput('message');
-          const channel = core.getInput('channel');
-          const username = core.getInput('username');
+          const webhookUrl = core.getInput(${{ secrets.SLACK_WEBHOOK_URL }});
+          const customMessage = core.getInput('teste');
+          const channel = core.getInput('teste');
+          const username = core.getInput(${{ github.actor }});
           const iconEmoji = core.getInput('icon-emoji');
           const includeEventDetails = core.getInput('include-event-details') === 'true';
           
