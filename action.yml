@@ -30,23 +30,33 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: 'Checkout Action Repository'
+      uses: actions/checkout@v4
+      with:
+        repository: samuelBarreto/Action-Slack
+        ref: main
+        path: ./.action-repo
+    
     - name: 'Setup Node.js'
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: '**/package-lock.json'
+        cache-dependency-path: ./.action-repo/package-lock.json
     
     - name: 'Install dependencies'
       shell: bash
+      working-directory: ./.action-repo
       run: npm install
     
     - name: 'Build TypeScript project'
       shell: bash
+      working-directory: ./.action-repo
       run: npm run build
     
     - name: 'Run compiled test script'
       shell: bash
+      working-directory: ./.action-repo
       env:
         SLACK_WEBHOOK_URL: ${{ inputs.webhook-url }}
         GITHUB_REPOSITORY: ${{ github.repository }}

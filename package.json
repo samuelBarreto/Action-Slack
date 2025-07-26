@@ -1,6 +1,6 @@
 {
   "name": "github-slack-Action-Slack",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "GitHub Actions para enviar notificações para o Slack via curl",
   "main": "test-local.js",
   "scripts": {

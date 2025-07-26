@@ -1,0 +1,100 @@
+name: 'Slack Notification Action (Simple)'
+description: 'Envia notificações para o Slack sobre eventos do GitHub - Versão Simples'
+author: 'Samuel Campos'
+
+inputs:
+  webhook-url:
+    description: 'URL do webhook do Slack'
+    required: true
+  message:
+    description: 'Mensagem personalizada (opcional)'
+    required: false
+    default: ''
+  channel:
+    description: 'Canal do Slack (opcional)'
+    required: false
+    default: ''
+  username:
+    description: 'Nome do bot (opcional)'
+    required: false
+    default: 'GitHub Action Bot'
+  icon-emoji:
+    description: 'Emoji do bot (opcional)'
+    required: false
+    default: ':rocket:'
+  include-event-details:
+    description: 'Incluir detalhes do evento (true/false)'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Send Slack Notification'
+      shell: bash
+      run: |
+        # Cria a mensagem JSON
+        MESSAGE='{
+          "text": "${{ inputs.message || '🧪 GitHub Action - Slack Notification' }}",
+          "username": "${{ inputs.username }}",
+          "icon_emoji": "${{ inputs.icon-emoji }}"
+        }'
+        
+        # Adiciona canal se especificado
+        if [ -n "${{ inputs.channel }}" ]; then
+          MESSAGE=$(echo "$MESSAGE" | jq '. + {"channel": "${{ inputs.channel }}"}')
+        fi
+        
+        # Adiciona attachments se incluir detalhes do evento
+        if [ "${{ inputs.include-event-details }}" = "true" ]; then
+          ATTACHMENT='{
+            "color": "${{ job.status == ''success'' && ''#36a64f'' || ''#ff0000'' }}",
+            "title": "GitHub Action - ${{ github.event_name }}",
+            "fields": [
+              {
+                "title": "Repositório",
+                "value": "${{ github.repository }}",
+                "short": true
+              },
+              {
+                "title": "Branch",
+                "value": "${{ github.ref_name }}",
+                "short": true
+              },
+              {
+                "title": "Autor",
+                "value": "${{ github.actor }}",
+                "short": true
+              },
+              {
+                "title": "Status",
+                "value": "${{ job.status }}",
+                "short": true
+              },
+              {
+                "title": "Commit",
+                "value": "${{ github.sha }}",
+                "short": true
+              },
+              {
+                "title": "Evento",
+                "value": "${{ github.event_name }}",
+                "short": true
+              }
+            ],
+            "footer": "GitHub Action do Slack",
+            "ts": '$(date +%s)'
+          }'
+          MESSAGE=$(echo "$MESSAGE" | jq '. + {"attachments": ['"$ATTACHMENT"']}')
+        fi
+        
+        # Envia a mensagem
+        echo "Enviando mensagem para o Slack..."
+        echo "Payload: $MESSAGE"
+        
+        curl -X POST \
+          -H 'Content-type: application/json' \
+          --data "$MESSAGE" \
+          "${{ inputs.webhook-url }}"
+        
+        echo "Mensagem enviada!" 
