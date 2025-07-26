@@ -1,0 +1,58 @@
+name: 'Test Different Events (TypeScript)'
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  issues:
+    types: [ opened, closed ]
+  release:
+    types: [ published ]
+
+jobs:
+  test-events:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Test Push Event'
+        if: github.event_name == 'push'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🚀 Push realizado na branch ${{ github.ref_name }} (TypeScript)'
+          channel: '#deployments'
+          username: 'TypeScript Deploy Bot'
+          icon-emoji: ':rocket:'
+      
+      - name: 'Test Pull Request Event'
+        if: github.event_name == 'pull_request'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🔀 Pull Request ${{ github.event.action }}: ${{ github.event.pull_request.title }} (TypeScript)'
+          channel: '#code-review'
+          username: 'TypeScript PR Bot'
+          icon-emoji: ':git:'
+      
+      - name: 'Test Issue Event'
+        if: github.event_name == 'issues'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '📝 Issue ${{ github.event.action }}: ${{ github.event.issue.title }} (TypeScript)'
+          channel: '#issues'
+          username: 'TypeScript Issue Bot'
+          icon-emoji: ':memo:'
+      
+      - name: 'Test Release Event'
+        if: github.event_name == 'release'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🎉 Release ${{ github.event.action }}: ${{ github.event.release.name }} (TypeScript)'
+          channel: '#releases'
+          username: 'TypeScript Release Bot'
+          icon-emoji: ':package:' 

@@ -1,0 +1,68 @@
+name: 'Release Action (TypeScript)'
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Setup Node.js'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 'Install dependencies'
+        run: npm ci
+      
+      - name: 'Build TypeScript project'
+        run: npm run build
+      
+      - name: 'Create Release'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }} (TypeScript)
+          body: |
+            ## 🚀 Nova versão da Slack Notification Action (TypeScript)
+            
+            ### 📋 Mudanças:
+            - ✅ Build TypeScript para JavaScript
+            - ✅ Execução do script compilado da pasta `dist`
+            - ✅ Node.js 18+ para compatibilidade
+            - ✅ Cache de dependências otimizado
+            - ✅ Variáveis de ambiente configuradas
+            
+            ### 🛠️ Como usar:
+            ```yaml
+            - name: 'Send Slack Notification'
+              uses: samuelBarreto/Action-Slack@${{ github.ref_name }}
+              with:
+                webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+            ```
+            
+            ### 🔧 Processo da Action:
+            1. **Setup Node.js 18**
+            2. **Instala dependências** (`npm ci`)
+            3. **Compila TypeScript** (`npm run build`)
+            4. **Executa script compilado** (`node dist/test-local-fixed.js`)
+          
+          draft: false
+          prerelease: false
+      
+      - name: 'Notify Release'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🎊 Nova versão TypeScript da Action lançada: ${{ github.ref_name }}'
+          channel: '#releases'
+          username: 'TypeScript Release Bot'
+          icon-emoji: ':package:' 

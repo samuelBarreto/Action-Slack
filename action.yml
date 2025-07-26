@@ -1,0 +1,57 @@
+name: 'Slack Notification Action'
+description: 'Envia notificações para o Slack sobre eventos do GitHub - Versão TypeScript'
+author: 'Samuel Campos'
+
+inputs:
+  webhook-url:
+    description: 'URL do webhook do Slack'
+    required: true
+  message:
+    description: 'Mensagem personalizada (opcional)'
+    required: false
+    default: ''
+  channel:
+    description: 'Canal do Slack (opcional)'
+    required: false
+    default: ''
+  username:
+    description: 'Nome do bot (opcional)'
+    required: false
+    default: 'GitHub Action Bot'
+  icon-emoji:
+    description: 'Emoji do bot (opcional)'
+    required: false
+    default: ':rocket:'
+  include-event-details:
+    description: 'Incluir detalhes do evento (true/false)'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Setup Node.js'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: 'Install dependencies'
+      shell: bash
+      run: npm ci
+    
+    - name: 'Build TypeScript project'
+      shell: bash
+      run: npm run build
+    
+    - name: 'Run compiled test script'
+      shell: bash
+      env:
+        SLACK_WEBHOOK_URL: ${{ inputs.webhook-url }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_REF_NAME: ${{ github.ref_name }}
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_EVENT_NAME: ${{ github.event_name }}
+        GITHUB_JOB_STATUS: 'success'
+      run: node dist/test-local-fixed.js 

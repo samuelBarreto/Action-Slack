@@ -1,0 +1,34 @@
+name: 'Test Action (TypeScript Build)'
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Test Basic Notification'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+      
+      - name: 'Test Custom Message'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🧪 Teste da Action TypeScript - Mensagem personalizada'
+          channel: '#testes'
+          username: 'TypeScript Bot'
+          icon-emoji: ':typescript:'
+      
+      - name: 'Test Without Event Details'
+        uses: ./
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          include-event-details: 'false' 
