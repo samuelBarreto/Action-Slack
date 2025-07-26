@@ -1,5 +1,5 @@
-name: 'Slack Notification Action'
-description: 'Envia notificações para o Slack sobre eventos do GitHub - Versão TypeScript'
+name: 'Slack Notification Action (No Cache)'
+description: 'Envia notificações para o Slack sobre eventos do GitHub - Versão TypeScript (Sem cache)'
 author: 'Samuel Campos'
 
 inputs:
@@ -34,8 +34,6 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: '**/package-lock.json'
     
     - name: 'Install dependencies'
       shell: bash

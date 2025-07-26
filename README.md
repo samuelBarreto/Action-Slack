@@ -27,6 +27,14 @@ Uma GitHub Action reutilizável para enviar notificações para o Slack sobre ev
 
 ## 🛠️ Como usar
 
+### ⚡ Configuração Rápida
+
+Para usar em outros repositórios:
+
+1. **Configure o webhook do Slack** (veja [SETUP-GUIDE.md](SETUP-GUIDE.md))
+2. **Adicione o secret** `SLACK_WEBHOOK_URL` no GitHub
+3. **Crie o workflow** `.github/workflows/slack-notifications.yml`
+
 ### Uso Básico
 
 ```yaml
@@ -142,6 +150,33 @@ A action detecta automaticamente o tipo de evento e ajusta a aparência:
 
 ## 📋 Exemplos de Uso
 
+### 🚀 Para Outros Repositórios
+
+#### Exemplo Simples:
+```yaml
+name: 'Slack Notifications'
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+      
+      - name: 'Send Slack Notification'
+        uses: samuelBarreto/Action-Slack@main
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message: '🚀 Atividade detectada no repositório!'
+```
+
+#### Exemplo Completo:
+Veja [examples/usage-in-other-repo.yml](examples/usage-in-other-repo.yml) para um exemplo completo com múltiplos jobs e notificações condicionais.
+
 ### 1. Notificação de Deploy
 
 ```yaml
@@ -205,6 +240,12 @@ A action detecta automaticamente o tipo de evento e ajusta a aparência:
    ```
 
 ## 🔧 Como a Action Funciona
+
+A action segue este processo:
+
+### ⚠️ Problema de Cache Resolvido
+
+A action agora inclui `cache-dependency-path: '**/package-lock.json'` para evitar erros em repositórios sem `package-lock.json`. Se ainda houver problemas, a action funcionará sem cache.
 
 A action segue este processo:
 
