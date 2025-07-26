@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Script de teste para a GitHub Action
- * Simula o comportamento da action localmente
+ * Script de teste para a GitHub Action atualizada
+ * Simula o comportamento da action localmente usando curl
  */
 
 const { execSync } = require('child_process');
@@ -44,7 +44,7 @@ function getEventStatus(eventName) {
   }
 }
 
-// Função para criar mensagem (mesmo formato da action)
+// Função para criar mensagem (mesmo formato da action atualizada)
 function createMessage(options = {}) {
   const {
     customMessage = '',
@@ -55,7 +55,7 @@ function createMessage(options = {}) {
   } = options;
 
   const eventStatus = getEventStatus(mockContext.eventName);
-  
+
   let message = {
     username: username,
     icon_emoji: iconEmoji
@@ -69,11 +69,11 @@ function createMessage(options = {}) {
     message.text = customMessage;
   } else {
     message.text = `${eventStatus.emoji} GitHub Action - ${mockContext.eventName}`;
-    
+
     if (includeEventDetails) {
       message.attachments = [{
         color: eventStatus.color,
-        title: `Evento: ${mockContext.eventName}`,
+        title: `GitHub Action - ${mockContext.eventName}`,
         fields: [
           {
             title: 'Repositório',
@@ -81,7 +81,7 @@ function createMessage(options = {}) {
             short: true
           },
           {
-            title: 'Branch/Ref',
+            title: 'Branch',
             value: mockContext.ref.replace('refs/heads/', '').replace('refs/tags/', ''),
             short: true
           },
@@ -91,8 +91,18 @@ function createMessage(options = {}) {
             short: true
           },
           {
+            title: 'Status',
+            value: eventStatus.status,
+            short: true
+          },
+          {
             title: 'Commit',
             value: mockContext.sha.substring(0, 8),
+            short: true
+          },
+          {
+            title: 'Evento',
+            value: mockContext.eventName,
             short: true
           }
         ],
@@ -105,22 +115,31 @@ function createMessage(options = {}) {
   return message;
 }
 
-// Função para enviar mensagem
+// Função para enviar mensagem via curl (mesmo método da action)
 async function sendSlackMessage(message) {
   try {
-    const response = await fetch(SLACK_WEBHOOK_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(message)
-    });
-
-    if (response.ok) {
+    console.log('📡 Enviando mensagem para o Slack...');
+    
+    // Cria arquivo temporário com a mensagem JSON
+    const tempFile = path.join(process.cwd(), 'temp_message.json');
+    fs.writeFileSync(tempFile, JSON.stringify(message, null, 2));
+    
+    console.log('📄 Arquivo temporário criado');
+    
+    // Comando curl usando arquivo
+    const curlCommand = `curl -X POST -H 'Content-type: application/json' --data @${tempFile} ${SLACK_WEBHOOK_URL}`;
+    
+    const result = execSync(curlCommand, { encoding: 'utf8' });
+    
+    // Remove arquivo temporário
+    fs.unlinkSync(tempFile);
+    console.log('🗑️ Arquivo temporário removido');
+    
+    if (result.trim() === 'ok') {
       console.log('✅ Mensagem enviada com sucesso!');
       return true;
     } else {
-      console.error(`❌ Erro ao enviar mensagem: ${response.status} ${response.statusText}`);
+      console.error(`❌ Erro ao enviar mensagem: ${result.trim()}`);
       return false;
     }
   } catch (error) {
@@ -131,8 +150,8 @@ async function sendSlackMessage(message) {
 
 // Função principal de teste
 async function testAction() {
-  console.log('🧪 Testando GitHub Action do Slack\n');
-  
+  console.log('🧪 Testando GitHub Action do Slack (Novo Formato)\n');
+
   // Teste 1: Mensagem básica
   console.log('📋 Teste 1: Mensagem básica');
   const basicMessage = createMessage();

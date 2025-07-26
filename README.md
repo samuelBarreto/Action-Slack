@@ -9,6 +9,7 @@ Uma GitHub Action reutilizável para enviar notificações para o Slack sobre ev
 - 📊 **Detalhado**: Inclui informações do evento automaticamente
 - 🎨 **Customizável**: Cores e emojis diferentes por tipo de evento
 - 🔒 **Seguro**: Usa secrets para URLs do webhook
+- 🐌 **Compatível**: Usa curl com arquivo temporário (mesmo método do test-local-fixed.js)
 
 ## 📋 Pré-requisitos
 
@@ -175,9 +176,16 @@ Para testar localmente, use o script incluído:
 # Configure a variável de ambiente
 export SLACK_WEBHOOK_URL="sua-url-do-webhook"
 
-# Execute o teste
-npm run test:fixed
+# Execute o teste da action atualizada
+npm run test:action
+
+# Ou teste com diferentes eventos
+GITHUB_EVENT_NAME=push npm run test:action
+GITHUB_EVENT_NAME=pull_request npm run test:action
+GITHUB_EVENT_NAME=release npm run test:action
 ```
+
+O script `test-action.js` simula exatamente o comportamento da action usando curl com arquivo temporário.
 
 ## 📝 Licença
 

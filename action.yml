@@ -36,6 +36,9 @@ runs:
         script: |
           const core = require('@actions/core');
           const github = require('@actions/github');
+          const fs = require('fs');
+          const path = require('path');
+          const { execSync } = require('child_process');
           
           // Obter inputs
           const webhookUrl = core.getInput('webhook-url');
@@ -72,7 +75,7 @@ runs:
             statusEmoji = '🚀';
           }
           
-          // Criar mensagem
+          // Criar mensagem (mesmo formato do test-local-fixed.js)
           let message = {
             username: username,
             icon_emoji: iconEmoji
@@ -92,7 +95,7 @@ runs:
             if (includeEventDetails) {
               message.attachments = [{
                 color: statusColor,
-                title: `Evento: ${eventName}`,
+                title: `GitHub Action - ${eventName}`,
                 fields: [
                   {
                     title: 'Repositório',
@@ -100,7 +103,7 @@ runs:
                     short: true
                   },
                   {
-                    title: 'Branch/Ref',
+                    title: 'Branch',
                     value: ref.replace('refs/heads/', '').replace('refs/tags/', ''),
                     short: true
                   },
@@ -110,8 +113,18 @@ runs:
                     short: true
                   },
                   {
+                    title: 'Status',
+                    value: status,
+                    short: true
+                  },
+                  {
                     title: 'Commit',
                     value: sha.substring(0, 8),
+                    short: true
+                  },
+                  {
+                    title: 'Evento',
+                    value: eventName,
                     short: true
                   }
                 ],
@@ -121,20 +134,29 @@ runs:
             }
           }
           
-          // Enviar para o Slack
+          // Enviar para o Slack usando curl (mesmo método do test-local-fixed.js)
           try {
-            const response = await fetch(webhookUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(message)
-            });
+            core.info('📡 Enviando mensagem para o Slack...');
             
-            if (response.ok) {
+            // Cria arquivo temporário com a mensagem JSON
+            const tempFile = path.join(process.cwd(), 'temp_message.json');
+            fs.writeFileSync(tempFile, JSON.stringify(message, null, 2));
+            
+            core.info('📄 Arquivo temporário criado');
+            
+            // Comando curl usando arquivo
+            const curlCommand = `curl -X POST -H 'Content-type: application/json' --data @${tempFile} ${webhookUrl}`;
+            
+            const result = execSync(curlCommand, { encoding: 'utf8' });
+            
+            // Remove arquivo temporário
+            fs.unlinkSync(tempFile);
+            core.info('🗑️ Arquivo temporário removido');
+            
+            if (result.trim() === 'ok') {
               core.info('✅ Notificação enviada para o Slack com sucesso!');
             } else {
-              core.setFailed(`❌ Erro ao enviar notificação: ${response.status} ${response.statusText}`);
+              core.setFailed(`❌ Erro ao enviar notificação: ${result.trim()}`);
             }
           } catch (error) {
             core.setFailed(`❌ Erro ao enviar notificação: ${error.message}`);
