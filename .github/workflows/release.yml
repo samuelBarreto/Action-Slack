@@ -33,6 +33,7 @@ jobs:
               uses: samuelBarreto/Action-Slack@${{ github.ref_name }}
               with:
                 webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+                github-actor: ${{ github.actor }}
             ```
           
           draft: false
@@ -46,3 +47,4 @@ jobs:
           channel: '#releases'
           username: 'Release Bot'
           icon-emoji: ':package:' 
+          github-actor: ${{ github.actor }}

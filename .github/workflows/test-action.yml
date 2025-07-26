@@ -17,6 +17,7 @@ jobs:
         uses: ./
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          github-actor: ${{ github.actor }}
       
       - name: 'Test Custom Message'
         uses: ./
@@ -26,6 +27,8 @@ jobs:
           channel: '#testes'
           username: 'Test Bot'
           icon-emoji: ':test_tube:'
+          github-actor: ${{ github.actor }}
+
       
       - name: 'Test Without Event Details'
         uses: ./
