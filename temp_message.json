@@ -1,0 +1,43 @@
+{
+  "text": "🧪 Teste Local - GitHub Action do Slack",
+  "attachments": [
+    {
+      "color": "#36a64f",
+      "title": "GitHub Action - push",
+      "fields": [
+        {
+          "title": "Repositório",
+          "value": "seu-usuario/seu-repositorio",
+          "short": true
+        },
+        {
+          "title": "Branch",
+          "value": "main",
+          "short": true
+        },
+        {
+          "title": "Autor",
+          "value": "seu-usuario",
+          "short": true
+        },
+        {
+          "title": "Status",
+          "value": "success",
+          "short": true
+        },
+        {
+          "title": "Commit",
+          "value": "abc123de",
+          "short": true
+        },
+        {
+          "title": "Evento",
+          "value": "push",
+          "short": true
+        }
+      ],
+      "footer": "GitHub Action do Slack - Teste Local",
+      "ts": 1753545796
+    }
+  ]
+}

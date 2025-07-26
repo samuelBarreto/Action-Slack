@@ -5,8 +5,16 @@
   "main": "test-local.js",
   "scripts": {
     "test:fixed": "node test-local-fixed.js",
+    "test:fixed:ts": "npx ts-node test-local-fixed.ts",
+    "test:fixed:build": "node dist/test-local-fixed.js",
     "test:simple": "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"Hello, World!\"}' https://hooks.slack.com/services/",
-    "test:action": "node test-action.js"
+    "test:action": "node test-action.js",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "build:clean": "rimraf dist && tsc",
+    "type-check": "tsc --noEmit",
+    "start": "node dist/test-local-fixed.js",
+    "dev": "npx ts-node test-local-fixed.ts"
   },
   "keywords": [
     "github",
@@ -14,7 +22,8 @@
     "slack",
     "notifications",
     "curl",
-    "automation"
+    "automation",
+    "typescript"
   ],
   "author": "Samuel Campos",
   "license": "MIT",
@@ -27,5 +36,11 @@
   },
   "dependencies": {
     "dotenv": "^17.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0",
+    "rimraf": "^5.0.0"
   }
 }
